@@ -17,7 +17,79 @@ if not sourceLibFound then return end
 if autoUpdate then
     SourceUpdater(scriptName, version, "raw.github.com", "/RyukOP/Scripts/master/RyukViktor.lua", SCRIPT_PATH .. GetCurrentEnv().FILE_NAME, "/RyukOP/Scripts/master/RyukViktor.version"):SetSilent(silentUpdate):CheckUpdate()
 end
+--[[
 
+
+
+
+
+
+	--				GAP CLOSER
+					
+					
+					
+					
+--]]
+
+isAGapcloserUnit = {
+       ['Ahri']        = {true, spell = _R, 	               range = 450,   projSpeed = 2200},
+        ['Aatrox']      = {true, spell = _Q,                  range = 1000,  projSpeed = 1200, },
+        ['Akali']       = {true, spell = _R,                  range = 800,   projSpeed = 2200, }, -- Targeted ability
+        ['Alistar']     = {true, spell = _W,                  range = 650,   projSpeed = 2000, }, -- Targeted ability
+        ['Diana']       = {true, spell = _R,                  range = 825,   projSpeed = 2000, }, -- Targeted ability
+        ['Gragas']      = {true, spell = _E,                  range = 600,   projSpeed = 2000, },
+        ['Graves']      = {true, spell = _E,                  range = 425,   projSpeed = 2000, exeption = true },
+        ['Hecarim']     = {true, spell = _R,                  range = 1000,  projSpeed = 1200, },
+        ['Irelia']      = {true, spell = _Q,                  range = 650,   projSpeed = 2200, }, -- Targeted ability
+        ['JarvanIV']    = {true, spell = jarvanAddition,      range = 770,   projSpeed = 2000, }, -- Skillshot/Targeted ability
+        ['Jax']         = {true, spell = _Q,                  range = 700,   projSpeed = 2000, }, -- Targeted ability
+        ['Jayce']       = {true, spell = 'JayceToTheSkies',   range = 600,   projSpeed = 2000, }, -- Targeted ability
+		['Katarina']	 = {true, spell = _E,                   range = 700,   projSpeed = 2000, },
+        ['Khazix']      = {true, spell = _E,                  range = 900,   projSpeed = 2000, },
+        ['Leblanc']     = {true, spell = _W,                  range = 600,   projSpeed = 2000, },
+        ['LeeSin']      = {true, spell = 'blindmonkqtwo',     range = 1300,  projSpeed = 1800, },
+        ['Leona']       = {true, spell = _E,                  range = 900,   projSpeed = 2000, },
+        ['Malphite']    = {true, spell = _R,                  range = 1000,  projSpeed = 1500, },
+        ['Maokai']      = {true, spell = _Q,                  range = 600,   projSpeed = 1200, }, -- Targeted ability	
+		['MasterYi']	=  {true, spell = _Q,	               range = 600,   projSpeed = 2200, }, -- Targeted
+        ['MonkeyKing']  = {true, spell = _E,                  range = 650,   projSpeed = 2200, }, -- Targeted ability
+        ['Pantheon']    = {true, spell = _W,                  range = 600,   projSpeed = 2000, }, -- Targeted ability
+        ['Poppy']       = {true, spell = _E,                  range = 525,   projSpeed = 2000, }, -- Targeted ability
+        --['Quinn']       = {true, spell = _E,                  range = 725,   projSpeed = 2000, }, -- Targeted ability
+        ['Renekton']    = {true, spell = _E,                  range = 450,   projSpeed = 2000, },
+        ['Sejuani']     = {true, spell = _Q,                  range = 650,   projSpeed = 2000, },
+        ['Shen']        = {true, spell = _E,                  range = 575,   projSpeed = 2000, },
+        ['Tristana']    = {true, spell = _W,                  range = 900,   projSpeed = 2000, },
+        ['Tryndamere']  = {true, spell = 'Slash',             range = 650,   projSpeed = 1450, },
+        ['XinZhao']     = {true, spell = _E,                  range = 650,   projSpeed = 2000, }, -- Targeted ability
+}
+--[[
+
+
+
+
+		--INTERRUPT
+		
+		
+		
+--]]
+
+champsToStun = {
+                { charName = "Katarina",        spellName = "KatarinaR" ,                  important = 0},
+                { charName = "Galio",           spellName = "GalioIdolOfDurand" ,          important = 0},
+                { charName = "FiddleSticks",    spellName = "Crowstorm" ,                  important = 1},
+                { charName = "FiddleSticks",    spellName = "DrainChannel" ,               important = 1},
+                { charName = "Nunu",            spellName = "AbsoluteZero" ,               important = 0},
+                { charName = "Shen",            spellName = "ShenStandUnited" ,            important = 0},
+                { charName = "Urgot",           spellName = "UrgotSwap2" ,                 important = 0},
+                { charName = "Malzahar",        spellName = "AlZaharNetherGrasp" ,         important = 0},
+                { charName = "Karthus",         spellName = "FallenOne" ,                  important = 0},
+                { charName = "Pantheon",        spellName = "Pantheon_GrandSkyfall_Jump" , important = 0},
+                { charName = "Varus",           spellName = "VarusQ" ,                     important = 1},
+                { charName = "Caitlyn",         spellName = "CaitlynAceintheHole" ,        important = 1},
+                { charName = "MissFortune",     spellName = "MissFortuneBulletTime" ,      important = 1},
+                { charName = "Warwick",         spellName = "InfiniteDuress" ,             important = 0}
+}
 
 function OnLoad()
 	VP = VPrediction()
@@ -34,11 +106,14 @@ function OnLoad()
 	Config.bind:addParam("stun", "Stun Prediction", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
 	Config.bind:addParam("harass", "Harass", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
 	Config.bind:addParam("auto", "Auto Spell", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("N"))
+	Config.bind:addParam("interrupt", "Interrupt With W/R", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("L"))
+	Config.bind:addParam("gapClose", "W on Gap Close", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("K"))
 	-- Options
 	Config:addSubMenu("Configurations","options")
 	Config.options:addParam("useUlt", "Use Ult", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("useStun", "Use Stun", SCRIPT_PARAM_ONOFF, true)
-	Config.options:addParam("gapClose", "W on Gap Closers", SCRIPT_PARAM_ONOFF, true)
+	Config.options:addParam("useW", "Interrupt with W", SCRIPT_PARAM_ONOFF, true)
+	Config.options:addParam("useR", "Interrupt with R", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("goodE", "Only Use E If High Chance (For Auto Spell)",SCRIPT_PARAM_ONOFF, false)
 	-- Draw
 	Config:addSubMenu("Draw","Draw")
@@ -270,40 +345,9 @@ function OnDraw()
 end
 
 function OnProcessSpell(unit, spell)
-	if Config.options.gapClose then
-     local jarvanAddition = unit.charName == "JarvanIV" and unit:CanUseSpell(_Q) ~= READY and _R or _Q 
-   	 local isAGapcloserUnit = {
---        ['Ahri']        = {true, spell = _R, range = 450,   projSpeed = 2200},
-        ['Aatrox']      = {true, spell = _Q,                  range = 1000,  projSpeed = 1200, },
-        ['Akali']       = {true, spell = _R,                  range = 800,   projSpeed = 2200, }, -- Targeted ability
-        ['Alistar']     = {true, spell = _W,                  range = 650,   projSpeed = 2000, }, -- Targeted ability
-        ['Diana']       = {true, spell = _R,                  range = 825,   projSpeed = 2000, }, -- Targeted ability
-        ['Gragas']      = {true, spell = _E,                  range = 600,   projSpeed = 2000, },
-        ['Graves']      = {true, spell = _E,                  range = 425,   projSpeed = 2000, exeption = true },
-        ['Hecarim']     = {true, spell = _R,                  range = 1000,  projSpeed = 1200, },
-        ['Irelia']      = {true, spell = _Q,                  range = 650,   projSpeed = 2200, }, -- Targeted ability
-        ['JarvanIV']    = {true, spell = jarvanAddition,      range = 770,   projSpeed = 2000, }, -- Skillshot/Targeted ability
-        ['Jax']         = {true, spell = _Q,                  range = 700,   projSpeed = 2000, }, -- Targeted ability
-        ['Jayce']       = {true, spell = 'JayceToTheSkies',   range = 600,   projSpeed = 2000, }, -- Targeted ability
-		['Katarina']	 = {true, spell = _E,                   range = 700,   projSpeed = 2000, },
-        ['Khazix']      = {true, spell = _E,                  range = 900,   projSpeed = 2000, },
-        ['Leblanc']     = {true, spell = _W,                  range = 600,   projSpeed = 2000, },
-        ['LeeSin']      = {true, spell = 'blindmonkqtwo',     range = 1300,  projSpeed = 1800, },
-        ['Leona']       = {true, spell = _E,                  range = 900,   projSpeed = 2000, },
-        ['Malphite']    = {true, spell = _R,                  range = 1000,  projSpeed = 1500 + unit.ms},
-        ['Maokai']      = {true, spell = _Q,                  range = 600,   projSpeed = 1200, }, -- Targeted ability	
-		['MasterYi']	=  {true, spell = _Q,	               range = 600,   projSpeed = 2200, }, -- Targeted
-        ['MonkeyKing']  = {true, spell = _E,                  range = 650,   projSpeed = 2200, }, -- Targeted ability
-        ['Pantheon']    = {true, spell = _W,                  range = 600,   projSpeed = 2000, }, -- Targeted ability
-        ['Poppy']       = {true, spell = _E,                  range = 525,   projSpeed = 2000, }, -- Targeted ability
-        --['Quinn']       = {true, spell = _E,                  range = 725,   projSpeed = 2000, }, -- Targeted ability
-        ['Renekton']    = {true, spell = _E,                  range = 450,   projSpeed = 2000, },
-        ['Sejuani']     = {true, spell = _Q,                  range = 650,   projSpeed = 2000, },
-        ['Shen']        = {true, spell = _E,                  range = 575,   projSpeed = 2000, },
-        ['Tristana']    = {true, spell = _W,                  range = 900,   projSpeed = 2000, },
-        ['Tryndamere']  = {true, spell = 'Slash',             range = 650,   projSpeed = 1450, },
-        ['XinZhao']     = {true, spell = _E,                  range = 650,   projSpeed = 2000, }, -- Targeted ability
-    }
+	
+	if Config.bind.gapClose then
+		local jarvanAddition = unit.charName == "JarvanIV" and unit:CanUseSpell(_Q) ~= READY and _R or _Q 
 		if unit.type == 'obj_AI_Hero' and unit.team == TEAM_ENEMY and isAGapcloserUnit[unit.charName] and GetDistance(unit) < 2000 and spell ~= nil and W:IsReady() then
 			if spell.name == (type(isAGapcloserUnit[unit.charName].spell) == 'number' and unit:GetSpellData(isAGapcloserUnit[unit.charName].spell).name or isAGapcloserUnit[unit.charName].spell) then
 				if spell.target ~= nil and spell.target.name == myHero.name or isAGapcloserUnit[unit.charName].spell == 'blindmonkqtwo' then
@@ -312,4 +356,29 @@ function OnProcessSpell(unit, spell)
 			end
 		end
 	end
+	if Config.bind.interrupt then
+		if unit.type == 'obj_AI_Hero' and unit.team == TEAM_ENEMY and GetDistance(unit) < (wRng or rRng) then
+		   	local spellName = spell.name
+			for i = 1, #champsToStun do
+				if unit.charName == champsToStun[i].charName and spellName == champsToStun[i].spellName then
+					if champsToStun[i].important == 0 then
+						if Config.options.useW and W:IsReady() and W:IsInRange(ts.target,myHero) then
+							CastSpell(_W,unit.x,unit.z)
+						end
+						if Config.options.useR and R:IsReady() and R:IsInRange(ts.target,myHero) then
+							CastSpell(_R,unit.x,unit.z)
+						end
+					else
+						if Config.options.useW and W:IsReady() and W:IsInRange(ts.target,myHero) then
+							CastSpell(_W,unit.x,unit.z)
+						end
+						if Config.options.useR and R:IsReady() and R:IsInRange(ts.target,myHero) then
+							CastSpell(_R,unit.x,unit.z)
+						end
+					end
+				end
+			end
+		end
+	end	
 end
+
