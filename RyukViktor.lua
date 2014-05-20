@@ -1,7 +1,7 @@
 require "VPrediction"
 require "SourceLib"
 if myHero.charName ~= "Viktor" then return end
-local version = 0.7
+local version = 0.8
 local autoUpdate   = true
 local scriptName = "RyukViktor"
 local sourceLibFound = true
@@ -28,13 +28,19 @@ function OnLoad()
 	R = Spell(_R, rRng):SetSkillshot(VP, SKILLSHOT_CIRCULAR, 250, 0.5, 1210, false)
 	DFG = Item(3128,750)
 	Config = scriptConfig("RyukViktor","RyukViktor")
-	Config:addParam("active", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
-	Config:addParam("stun", "Stun Prediction", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
-	Config:addParam("harass", "Harass", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
-	Config:addParam("useUlt", "Use Ult", SCRIPT_PARAM_ONOFF, true)
-	Config:addParam("useStun", "Use Stun", SCRIPT_PARAM_ONOFF, true)
-	Config:addParam("gapClose", "W on Gap Closers", SCRIPT_PARAM_ONOFF, true)
-	Config:addParam("auto", "Auto Spell", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("N"))
+	-- Key Binds
+	Config:addSubMenu("Key Bindings","bind")
+	Config.bind:addParam("active", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
+	Config.bind:addParam("stun", "Stun Prediction", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
+	Config.bind:addParam("harass", "Harass", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
+	Config.bind:addParam("auto", "Auto Spell", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("N"))
+	-- Options
+	Config:addSubMenu("Configurations","options")
+	Config.options:addParam("useUlt", "Use Ult", SCRIPT_PARAM_ONOFF, true)
+	Config.options:addParam("useStun", "Use Stun", SCRIPT_PARAM_ONOFF, true)
+	Config.options:addParam("gapClose", "W on Gap Closers", SCRIPT_PARAM_ONOFF, true)
+	Config.options:addParam("goodE", "Only Use E If High Chance (For Auto Spell)",SCRIPT_PARAM_ONOFF, false)
+	-- Draw
 	Config:addSubMenu("Draw","Draw")
 	Config.Draw:addParam("drawq", "Draw Q", SCRIPT_PARAM_ONOFF, true)
 	Config.Draw:addParam("draww", "Draw W", SCRIPT_PARAM_ONOFF, true)
@@ -47,7 +53,7 @@ function OnLoad()
 		Config.targets:addParam(""..enemy.charName,"".. enemy.charName,SCRIPT_PARAM_ONOFF, true)
 		table.insert(enemyTable,enemy.charName)
 	end
-	ts = TargetSelector(TARGET_LESS_CAST,rRng,DAMAGE_MAGIC,false)
+	ts = TargetSelector(TARGET_LESS_CAST,eRng,DAMAGE_MAGIC,false)
 	ts.name = "Viktor"
 	Config:addTS(ts)
 	PrintChat("<font color='#E97FA5'> >> RyukViktor Loaded!</font>")
@@ -55,19 +61,19 @@ end
 
 function OnTick()
 	ts:update()
-	if Config.active then 
+	if Config.bind.active then 
 		fullCombo()
 	end
 	if ts.target then
 		stormControl(ts.target)
 	end
-	if Config.stun then
+	if Config.bind.stun then
 		stun()
 	end
-	if Config.harass then
+	if Config.bind.harass then
 		harass()
 	end
-	if Config.auto then
+	if Config.bind.auto then
 		Auto()
 	end
 end
@@ -79,12 +85,23 @@ function Auto()
 		end
 		if E:IsReady() and E:IsInRange(ts.target, myHero) then
 			pose, chance = E:GetPrediction(ts.target)
-			if pose ~= nil and chance >= 3then
-				if GetDistance(ts.target) < 540 then
-					Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
+			if pose ~= nil then
+				if Config.options.goodE then
+					if chance >= 2 then
+						if GetDistance(ts.target) < 540 then
+							Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
+						else
+						start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
+						Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()		
+						end
+					end
 				else
-					start = Vector(myHero) - 540 * (Vector(myHero) - Vector(ts.target)):normalized()
-					Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()
+					if GetDistance(ts.target) < 540 then
+						Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
+					else
+						start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
+						Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()		
+					end
 				end
 			end
 		end
@@ -110,7 +127,7 @@ function harass()
 				if GetDistance(ts.target) < 540 then
 					Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
 				else
-					start = Vector(myHero) - 540 * (Vector(myHero) - Vector(ts.target)):normalized()
+					start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
 					Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()
 				end
 			end
@@ -156,14 +173,14 @@ function fullCombo()
 			CastSpell(_Q,ts.target)
 		end
 		-- Casting W
-		if W:IsReady() and W:IsInRange(ts.target,myHero) and Config.useStun then
+		if W:IsReady() and W:IsInRange(ts.target,myHero) and Config.options.useStun then
 			posw = W:GetPrediction(ts.target)
 			if posw ~= nil then
 				if W:IsInRange(ts.target,myHero) and W:IsReady() then
 					if isFacing(ts.target,myHero) then
-						pw = Vector(posw) - 150 * (Vector(posw) - Vector(myHero)):normalized()
+						pw = Vector(posw) - 150 * (Vector(posw) - Vector(ts.target)):normalized()
 					else
-						pw = Vector(posw) + 150 * (Vector(posw) - Vector(myHero)):normalized()
+						pw = Vector(posw) + 150 * (Vector(posw) - Vector(ts.target)):normalized()
 					end
 					CastSpell(_W,pw.x,pw.z)
 				end
@@ -174,16 +191,16 @@ function fullCombo()
 			pose = E:GetPrediction(ts.target)
 			if pose ~= nil then
 				if GetDistance(ts.target) < 540 then
-					start = Vector(ts.target)
-					Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, start.z, toX = pose.x, toY = pose.z }):send()
+					Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, ts.target.z, toX = pose.x, toY = pose.z }):send()
 				else
-					start = Vector(myHero) - 540 * (Vector(myHero) - Vector(ts.target)):normalized()
+					--start = Vector(myHero) - 540 * (Vector(myHero) - Vector(ts.target)):normalized()
+					start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
 					Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()
 				end
 			end
 		end
 		-- Casting R
-		if Config.useUlt and R:IsReady() and R:IsInRange(ts.target, myHero) and shouldUlt() then
+		if Config.options.useUlt and R:IsReady() and R:IsInRange(ts.target, myHero) and shouldUlt() then
 			posr = R:GetPrediction(ts.target)
 			if posr ~= nil then
 				R:Cast(ts.target.x,ts.target.z)
@@ -216,9 +233,9 @@ function Damage(target)
      currentDamage = currentDamage + wDmg
     end
   
-		if R:IsReady() then
-			currentDamage = currentDamage + rDmg
-		end
+	if R:IsReady() then
+		currentDamage = currentDamage + rDmg
+	end
 	 
     if DFG:IsReady() then
      currentDamage = (currentDamage * damageAmp) + dfgDmg
@@ -253,9 +270,9 @@ function OnDraw()
 end
 
 function OnProcessSpell(unit, spell)
-	if Config.gapClose then
-    local jarvanAddition = unit.charName == "JarvanIV" and unit:CanUseSpell(_Q) ~= READY and _R or _Q 
-    local isAGapcloserUnit = {
+	if Config.options.gapClose then
+     local jarvanAddition = unit.charName == "JarvanIV" and unit:CanUseSpell(_Q) ~= READY and _R or _Q 
+   	 local isAGapcloserUnit = {
 --        ['Ahri']        = {true, spell = _R, range = 450,   projSpeed = 2200},
         ['Aatrox']      = {true, spell = _Q,                  range = 1000,  projSpeed = 1200, },
         ['Akali']       = {true, spell = _R,                  range = 800,   projSpeed = 2200, }, -- Targeted ability
@@ -273,7 +290,8 @@ function OnProcessSpell(unit, spell)
         ['LeeSin']      = {true, spell = 'blindmonkqtwo',     range = 1300,  projSpeed = 1800, },
         ['Leona']       = {true, spell = _E,                  range = 900,   projSpeed = 2000, },
         ['Malphite']    = {true, spell = _R,                  range = 1000,  projSpeed = 1500 + unit.ms},
-        ['Maokai']      = {true, spell = _Q,                  range = 600,   projSpeed = 1200, }, -- Targeted ability
+        ['Maokai']      = {true, spell = _Q,                  range = 600,   projSpeed = 1200, }, -- Targeted ability	
+		['MasterYi']	=  {true, spell = _Q,	               range = 600,   projSpeed = 2200, }, -- Targeted
         ['MonkeyKing']  = {true, spell = _E,                  range = 650,   projSpeed = 2200, }, -- Targeted ability
         ['Pantheon']    = {true, spell = _W,                  range = 600,   projSpeed = 2000, }, -- Targeted ability
         ['Poppy']       = {true, spell = _E,                  range = 525,   projSpeed = 2000, }, -- Targeted ability
@@ -285,9 +303,11 @@ function OnProcessSpell(unit, spell)
         ['Tryndamere']  = {true, spell = 'Slash',             range = 650,   projSpeed = 1450, },
         ['XinZhao']     = {true, spell = _E,                  range = 650,   projSpeed = 2000, }, -- Targeted ability
     }
-    if unit.type == 'obj_AI_Hero' and unit.team == TEAM_ENEMY and isAGapcloserUnit[unit.charName] and GetDistance(unit) < 2000 then
-			if spell ~= nil and isAGapcloserUnit[unit.charName].spell and spell.target ~= nil and spell.target.name == myHero.name or isAGapcloserUnit[unit.charName].spell == 'blindmonkqtwo' and W:IsReady() then
-				CastSpell(_W, myHero.x, myHero.z)
+		if unit.type == 'obj_AI_Hero' and unit.team == TEAM_ENEMY and isAGapcloserUnit[unit.charName] and GetDistance(unit) < 2000 and spell ~= nil and W:IsReady() then
+			if spell.name == (type(isAGapcloserUnit[unit.charName].spell) == 'number' and unit:GetSpellData(isAGapcloserUnit[unit.charName].spell).name or isAGapcloserUnit[unit.charName].spell) then
+				if spell.target ~= nil and spell.target.name == myHero.name or isAGapcloserUnit[unit.charName].spell == 'blindmonkqtwo' then
+					CastSpell(_W, myHero.x, myHero.z)
+				end
 			end
 		end
 	end
