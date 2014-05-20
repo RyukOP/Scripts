@@ -285,7 +285,7 @@ function OnProcessSpell(unit, spell)
         ['JarvanIV']    = {true, spell = jarvanAddition,      range = 770,   projSpeed = 2000, }, -- Skillshot/Targeted ability
         ['Jax']         = {true, spell = _Q,                  range = 700,   projSpeed = 2000, }, -- Targeted ability
         ['Jayce']       = {true, spell = 'JayceToTheSkies',   range = 600,   projSpeed = 2000, }, -- Targeted ability
-		['Katarina']	 = {true, spell = _E                   range = 700,   projSpeed = 2000, },
+		['Katarina']	 = {true, spell = _E,                   range = 700,   projSpeed = 2000, },
         ['Khazix']      = {true, spell = _E,                  range = 900,   projSpeed = 2000, },
         ['Leblanc']     = {true, spell = _W,                  range = 600,   projSpeed = 2000, },
         ['LeeSin']      = {true, spell = 'blindmonkqtwo',     range = 1300,  projSpeed = 1800, },
