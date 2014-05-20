@@ -1,7 +1,7 @@
 require "VPrediction"
 require "SourceLib"
 if myHero.charName ~= "Viktor" then return end
-local version = 0.8
+local version = 0.9
 local autoUpdate   = true
 local scriptName = "RyukViktor"
 local sourceLibFound = true
