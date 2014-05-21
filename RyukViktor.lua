@@ -1,10 +1,12 @@
 require "VPrediction"
 require "SourceLib"
+require "SOW"
 if myHero.charName ~= "Viktor" then return end
-local version = 0.95
-local autoUpdate   = true
+local version = 0.97
+local autoUpdate = true	
 local scriptName = "RyukViktor"
 local sourceLibFound = true
+local VP = VPrediction()
 if FileExist(LIB_PATH .. "SourceLib.lua") then
     require "SourceLib"
 else
@@ -92,7 +94,6 @@ champsToStun = {
 }
 
 function OnLoad()
-	VP = VPrediction()
 	qRng, wRng, eRng, rRng = 600, 625, 1040, 700
 	Q = Spell(_Q, qRng)
 	W = Spell(_W, wRng):SetSkillshot(VP, SKILLSHOT_CIRCULAR, 300, 0.5, 1750, false)
@@ -126,6 +127,9 @@ function OnLoad()
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		Config.targets:addParam(""..enemy.charName,"".. enemy.charName,SCRIPT_PARAM_ONOFF, true)
 	end
+	Orbwalker = SOW(VP)
+	Config:addSubMenu("["..myHero.charName.." - Orbwalker]", "SOWorb")
+	Orbwalker:LoadToMenu(Config.SOWorb)
 	ts = TargetSelector(TARGET_LESS_CAST,eRng,DAMAGE_MAGIC,false)
 	ts.name = "Viktor"
 	Config:addTS(ts)
