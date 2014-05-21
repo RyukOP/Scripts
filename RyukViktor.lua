@@ -123,10 +123,8 @@ function OnLoad()
 	Config.Draw:addParam("drawr", "Draw R", SCRIPT_PARAM_ONOFF, true)
 	Config.Draw:addParam("drawtext", "Draw Text", SCRIPT_PARAM_ONOFF, true)
 	Config:addSubMenu("Only Ult","targets")
-	enemyTable = {}
 	for i, enemy in ipairs(GetEnemyHeroes()) do
 		Config.targets:addParam(""..enemy.charName,"".. enemy.charName,SCRIPT_PARAM_ONOFF, true)
-		table.insert(enemyTable,enemy.charName)
 	end
 	ts = TargetSelector(TARGET_LESS_CAST,eRng,DAMAGE_MAGIC,false)
 	ts.name = "Viktor"
@@ -196,6 +194,9 @@ end
 
 function harass()
 	if ts.target then
+		if Q:IsReady() and Q:IsInRange(ts.target,myHero) then
+			CastSpell(_Q,ts.target)
+		end
 		if E:IsReady() and E:IsInRange(ts.target, myHero) then
 			pose = E:GetPrediction(ts.target)
 			if pose ~= nil then
@@ -206,9 +207,6 @@ function harass()
 					Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()
 				end
 			end
-		end
-		if Q:IsReady() and Q:IsInRange(ts.target,myHero) then
-			CastSpell(_Q,ts.target)
 		end
 	end
 end
