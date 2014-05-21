@@ -1,7 +1,7 @@
 require "VPrediction"
 require "SourceLib"
 if myHero.charName ~= "Viktor" then return end
-local version = 0.9
+local version = 0.95
 local autoUpdate   = true
 local scriptName = "RyukViktor"
 local sourceLibFound = true
@@ -294,7 +294,7 @@ end
 function Damage(target)
   if target then
     local qDmg = getDmg("Q", target, myHero)
-    local wDmg = getDmg("W", target, myHero)
+    local eDmg = getDmg("E", target, myHero)
     local rDmg = getDmg("R", target, myHero)
     local dfgDmg = (GetInventorySlotItem(3128) ~= nil and getDmg("DFG", target, myHero)) or 0
     local damageAmp = (GetInventorySlotItem(3128) ~= nil and 1.2) or 1
@@ -304,8 +304,8 @@ function Damage(target)
      currentDamage = currentDamage + qDmg
     end
    
-    if W:IsReady() then
-     currentDamage = currentDamage + wDmg
+    if E:IsReady() then
+     currentDamage = currentDamage + eDmg
     end
   
 	if R:IsReady() then
@@ -345,7 +345,6 @@ function OnDraw()
 end
 
 function OnProcessSpell(unit, spell)
-	
 	if Config.bind.gapClose then
 		local jarvanAddition = unit.charName == "JarvanIV" and unit:CanUseSpell(_Q) ~= READY and _R or _Q 
 		if unit.type == 'obj_AI_Hero' and unit.team == TEAM_ENEMY and isAGapcloserUnit[unit.charName] and GetDistance(unit) < 2000 and spell ~= nil and W:IsReady() then
