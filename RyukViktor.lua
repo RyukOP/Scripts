@@ -2,7 +2,7 @@ require "VPrediction"
 require "SourceLib"
 require "SOW"
 if myHero.charName ~= "Viktor" then return end
-local version = 0.97
+local version = 0.98
 local autoUpdate = true	
 local scriptName = "RyukViktor"
 local sourceLibFound = true
@@ -99,6 +99,11 @@ function OnLoad()
 	W = Spell(_W, wRng):SetSkillshot(VP, SKILLSHOT_CIRCULAR, 300, 0.5, 1750, false)
 	E = Spell(_E, eRng):SetSkillshot(VP, SKILLSHOT_LINEAR, 90, 0.5, 1210, false)
 	R = Spell(_R, rRng):SetSkillshot(VP, SKILLSHOT_CIRCULAR, 250, 0.5, 1210, false)
+	DLib = DamageLib()
+	--DamageLib:RegisterDamageSource(spellId, damagetype, basedamage, perlevel, scalingtype, scalingstat, percentscaling, condition, extra)
+	DLib:RegisterDamageSource(_Q, _MAGIC, 80, 45, _MAGIC, _AP, 0.65, function() return (player:CanUseSpell(_Q) == READY)end)
+	DLib:RegisterDamageSource(_E, _MAGIC, 70, 45, _MAGIC, _AP, 0.70, function() return (player:CanUseSpell(_E) == READY)end)
+	DLib:RegisterDamageSource(_R, _MAGIC, 150, 100, _MAGIC, _AP, 0.55, function() return (player:CanUseSpell(_R) == READY)end)
 	DFG = Item(3128,750)
 	Config = scriptConfig("RyukViktor","RyukViktor")
 	-- Key Binds
@@ -128,8 +133,10 @@ function OnLoad()
 		Config.targets:addParam(""..enemy.charName,"".. enemy.charName,SCRIPT_PARAM_ONOFF, true)
 	end
 	Orbwalker = SOW(VP)
-	Config:addSubMenu("["..myHero.charName.." - Orbwalker]", "SOWorb")
+	Config:addSubMenu("Orbwalker", "SOWorb")
 	Orbwalker:LoadToMenu(Config.SOWorb)
+	Combo = {_Q, _E, _R}
+	DLib:AddToMenu(Config.Draw,Combo)
 	ts = TargetSelector(TARGET_LESS_CAST,eRng,DAMAGE_MAGIC,false)
 	ts.name = "Viktor"
 	Config:addTS(ts)
@@ -293,35 +300,6 @@ function stormControl(target)
 	end
 end
 
-function Damage(target)
-  if target then
-    local qDmg = getDmg("Q", target, myHero)
-    local eDmg = getDmg("E", target, myHero)
-    local rDmg = getDmg("R", target, myHero)
-    local dfgDmg = (GetInventorySlotItem(3128) ~= nil and getDmg("DFG", target, myHero)) or 0
-    local damageAmp = (GetInventorySlotItem(3128) ~= nil and 1.2) or 1
-		local currentDamage = 0
-    
-    if Q:IsReady() then
-     currentDamage = currentDamage + qDmg
-    end
-   
-    if E:IsReady() then
-     currentDamage = currentDamage + eDmg
-    end
-  
-	if R:IsReady() then
-		currentDamage = currentDamage + rDmg
-	end
-	 
-    if DFG:IsReady() then
-     currentDamage = (currentDamage * damageAmp) + dfgDmg
-    end
-		return currentDamage
-  end
-	
-end
-
 function OnDraw()
 	if Config.Draw.drawq then
 		DrawCircle(myHero.x,myHero.y,myHero.z,qRng,0xFFFF0000)
@@ -334,15 +312,6 @@ function OnDraw()
 	end
 	if Config.Draw.drawr then
 		DrawCircle(myHero.x,myHero.y,myHero.z,rRng,0xFFFF0000)
-	end
-	if Config.drawtext then
-		for i, target in ipairs(GetEnemyHeroes()) do
-			if ValidTarget(target) and target.team ~= myHero.team and target.dead ~= true then
-				if Damage(target) > target.health then
-					PrintFloatText(target,0,"Killable")
-				end
-			end
-		end
 	end
 end
 
