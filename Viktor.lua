@@ -75,7 +75,18 @@ function harass()
 				end
 			end
 		end
+		if Q:IsReady() and Q:IsInRange(ts.target,myHero) then
+			CastSpell(_Q,ts.target)
+		end
 	end
+end
+
+function isFacing(source, target, lineLength)
+	local sourceVector = Vector(source.visionPos.x, source.visionPos.z)
+	local sourcePos = Vector(source.x, source.z)
+	sourceVector = (sourceVector-sourcePos):normalized()
+	sourceVector = sourcePos + (sourceVector*(GetDistance(target, source)))
+	return GetDistanceSqr(target, {x = sourceVector.x, z = sourceVector.y}) <= (lineLength and lineLength^2 or 90000)
 end
 
 function stun()
@@ -83,7 +94,12 @@ function stun()
 		if W:IsReady() and W:IsInRange(ts.target,myHero) then
 			posw = W:GetPrediction(ts.target)
 			if posw ~= nil then
-					W:Cast(ts.target.x,ts.target.z)
+					if isFacing(ts.target,myHero) then
+						pw = Vector(posw) - 150 * (Vector(posw) - Vector(myHero)):normalized()
+					else
+						pw = Vector(posw) + 150 * (Vector(posw) - Vector(myHero)):normalized()
+					end
+					CastSpell(_W,pw.x,pw.z)
 			end
 		end
 	end
@@ -104,7 +120,12 @@ function fullCombo()
 			posw = W:GetPrediction(ts.target)
 			if posw ~= nil then
 				if W:IsInRange(ts.target,myHero) and W:IsReady() then
-					W:Cast(ts.target.x,ts.target.z)
+					if isFacing(ts.target,myHero) then
+						pw = Vector(posw) - 150 * (Vector(posw) - Vector(myHero)):normalized()
+					else
+						pw = Vector(posw) + 150 * (Vector(posw) - Vector(myHero)):normalized()
+					end
+					CastSpell(_W,pw.x,pw.z)
 				end
 			end
 		end
@@ -168,16 +189,16 @@ function Damage(target)
 end
 
 function OnDraw()
-	if Config.drawq then
+	if Config.Draw.drawq then
 		DrawCircle(myHero.x,myHero.y,myHero.z,qRng,0xFFFF0000)
 	end 
-	if Config.draww then
+	if Config.Draw.draww then
 		DrawCircle(myHero.x,myHero.y,myHero.z,wRng,0xFFFF0000)
 	end
-	if Config.drawe then
+	if Config.Draw.drawe then
 		DrawCircle(myHero.x,myHero.y,myHero.z,eRng,0xFFFF0000)
 	end
-	if Config.drawr then
+	if Config.Draw.drawr then
 		DrawCircle(myHero.x,myHero.y,myHero.z,rRng,0xFFFF0000)
 	end
 	if Config.drawtext then
