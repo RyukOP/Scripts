@@ -2,7 +2,7 @@ require "VPrediction"
 require "SourceLib"
 require "SOW"
 if myHero.charName ~= "Viktor" then return end
-local version = 0.99
+local version = 1.0
 local autoUpdate = true	
 local scriptName = "RyukViktor"
 local sourceLibFound = true
@@ -122,6 +122,7 @@ function OnLoad()
 	Config.options:addParam("useR", "Interrupt with R", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("goodE", "Only Use E If High Chance (For Auto Spell)",SCRIPT_PARAM_ONOFF, false)
 	Config.options:addParam("ccc", "CC Chaining with W (Auto must be on)", SCRIPT_PARAM_ONOFF, true)
+	Config.options:addParam("hitTwo","Hit two champions with E", SCRIPT_PARAM_ONOFF,false)
 	-- Draw
 	Config:addSubMenu("Draw","Draw")
 	Config.Draw:addParam("drawq", "Draw Q", SCRIPT_PARAM_ONOFF, true)
@@ -163,30 +164,81 @@ function OnTick()
 	end
 end
 
+function findSecondEnemy(first,range)
+	count = nil
+	current = nil
+	for i, enemy in ipairs(GetEnemyHeroes()) do
+		if enemy.charName ~= first.charName and GetDistance(enemy) < range then
+			if count == nil then
+				count = enemy.health
+				current = enemy
+			end
+			if count > enemy.health then
+				count = enemy.health
+				current = enemy
+			end
+		end
+	end
+	return current
+end
+			
+
 function Auto()
 	if ts.target then
 		if Q:IsReady() and Q:IsInRange(ts.target,myHero) then
 			CastSpell(_Q,ts.target)
 		end
 		if E:IsReady() and E:IsInRange(ts.target, myHero) then
-			pose, chance = E:GetPrediction(ts.target)
-			if pose ~= nil then
-				if Config.options.goodE then
-					if chance >= 2 then
-						if GetDistance(ts.target) < 540 then
-							Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
-						else
-							start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
-						Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()			
+			pose1, chance = E:GetPrediction(ts.target)
+			if Config.options.hitTwo then
+				second = findSecondEnemy(ts.target,eRng)
+				if second then
+					pose2 = E:GetPrediction(second)
+					if GetDistance((second or ts.target)) > 540 then
+						
+						--
+						m = (pose1.z - pose2.z)/(pose1.x - pose2.x)
+						b = pose1.z - (m*pose1.x)
+
+						x = (- 500 - b)/(m-1)
+						z = (m*x) + b
+						--
+						if pose1 ~= nil and pose2 ~= nil then
+							if Config.options.goodE then
+								if chance >= 2 then
+									ECast(x,z,pose1.x,pose1.z)
+								else
+									ECast(x,z,pose1.x,pose1.z)								end
+							end
 						end
 					else
-						if GetDistance(ts.target) < 540 then
-							Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
-						else
-							start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
-							Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()		
+						if pose1 and pose2 then
+							c = nil
+							f = nil
+							if GetDistance(second) > GetDistance(ts.target) then
+								c = pose1
+								f = pose2
+							else
+								c = pose2
+								f = pose1
+							end
+							ECast(c.x,c.z,f.x,f.z)
 						end
 					end
+				else
+					if GetDistance(ts.target) < 540 then
+						ECast(ts.target.x,ts.target.z,pose1.x,pose1.z)
+					else
+						start = Vector(myHero) + (myHero - pose1)*(-550/GetDistance(pose1))
+						ECast(start.x,start.z,pose1.x,pose1.z)					end
+				end
+			else
+				if pose1 then
+					if GetDistance(ts.target) < 540 then
+						ECast(ts.target.x,ts.target.z,pose1.x,pose1.z)
+					else
+						start = Vector(myHero) + (myHero - pose1)*(-550/GetDistance(pose1))
+						ECast(start.x,start.z,pose1.x,pose1.z)					end
 				end
 			end
 		end
@@ -194,7 +246,7 @@ function Auto()
 			for i, enemy in ipairs(GetEnemyHeroes()) do
 				if W:IsInRange(enemy) then
 					posw, chance = W:GetPrediction(enemy)
-					if chance > 3 then
+					if posw and chance > 3 then
 						CastSpell(_W,posw.x,posw.z)
 					end
 				end
@@ -223,11 +275,10 @@ function harass()
 			pose = E:GetPrediction(ts.target)
 			if pose ~= nil then
 				if GetDistance(ts.target) < 540 then
-					Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
+					ECast(ts.target.x,ts.target.z,pose.x,pose.z)
 				else
 					start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
-					Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()
-				end
+					ECast(start.x,start.z,pose.x,pose.z)				end
 			end
 		end
 	end
@@ -363,3 +414,7 @@ function OnProcessSpell(unit, spell)
 	end	
 end
 
+function ECast(sx,sz,ex,ez)
+	Packet('S_CAST', { spellId = SPELL_3, fromX = sx, fromY = sz, toX = ex, toY = ez }):send()
+end
+							
