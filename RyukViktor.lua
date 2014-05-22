@@ -1,5 +1,22 @@
 require "VPrediction"
 require "SourceLib"
+local version = 0.6
+local autoUpdate   = true
+local scriptName = "RyukViktor"
+local sourceLibFound = true
+if FileExist(LIB_PATH .. "SourceLib.lua") then
+    require "SourceLib"
+else
+    sourceLibFound = false
+    DownloadFile("https://raw.github.com/TheRealSource/public/master/common/SourceLib.lua", LIB_PATH .. "SourceLib.lua", function() print("<font color=\"#6699ff\"><b>" .. scriptName .. ":</b></font> <font color=\"#FFFFFF\">SourceLib downloaded! Please reload!</font>") end)
+end
+if not sourceLibFound then return end
+
+-- Updater
+if autoUpdate then
+    SourceUpdater(scriptName, version, "raw.github.com", "RyukOP/Scripts/master/Viktor.lua", SCRIPT_PATH .. GetCurrentEnv().FILE_NAME, "RyukOP/Scripts/master/Viktor.lua.version"):SetSilent(silentUpdate):CheckUpdate()
+end
+
 
 function OnLoad()
 	VP = VPrediction()
@@ -16,6 +33,7 @@ function OnLoad()
 	Config:addParam("useUlt", "Use Ult", SCRIPT_PARAM_ONOFF, true)
 	Config:addParam("useStun", "Use Stun", SCRIPT_PARAM_ONOFF, true)
 	Config:addParam("gapClose", "W on Gap Closers", SCRIPT_PARAM_ONOFF, true)
+	Config:addParam("auto", "Auto Spell", SCRIPT_PARAM_ONKEYTOGGLE, true, string.byte("N"))
 	Config:addSubMenu("Draw","Draw")
 	Config.Draw:addParam("drawq", "Draw Q", SCRIPT_PARAM_ONOFF, true)
 	Config.Draw:addParam("draww", "Draw W", SCRIPT_PARAM_ONOFF, true)
@@ -36,7 +54,6 @@ end
 
 function OnTick()
 	ts:update()
-	
 	if Config.active then 
 		fullCombo()
 	end
@@ -48,6 +65,28 @@ function OnTick()
 	end
 	if Config.harass then
 		harass()
+	end
+	if Config.auto then
+		Auto()
+	end
+end
+
+function Auto()
+	if ts.target then
+		if Q:IsReady() and Q:IsInRange(ts.target,myHero) then
+			CastSpell(_Q,ts.target)
+		end
+		if E:IsReady() and E:IsInRange(ts.target, myHero) then
+			pose, chance = E:GetPrediction(ts.target)
+			if pose ~= nil and chance >= 3then
+				if GetDistance(ts.target) < 540 then
+					Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
+				else
+					start = Vector(myHero) - 540 * (Vector(myHero) - Vector(ts.target)):normalized()
+					Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()
+				end
+			end
+		end
 	end
 end
 
