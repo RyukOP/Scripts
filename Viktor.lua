@@ -22,6 +22,7 @@ function OnLoad()
 	ts = TargetSelector(TARGET_LESS_CAST,rRng,DAMAGE_MAGIC,false)
 	ts.name = "Viktor"
 	Config:addTS(ts)
+	PrintChat("<font color='#E97FA5'>> RyukViktor!</font>")
 end
 
 function OnTick()
