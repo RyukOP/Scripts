@@ -113,7 +113,8 @@ function fullCombo()
 			pose = E:GetPrediction(ts.target)
 			if pose ~= nil then
 				if GetDistance(ts.target) < 540 then
-					Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
+					start = Vector(ts.target)
+					Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, start.z, toX = pose.x, toY = pose.z }):send()
 				else
 					start = Vector(myHero) - 540 * (Vector(myHero) - Vector(ts.target)):normalized()
 					Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()
@@ -223,8 +224,10 @@ function OnProcessSpell(unit, spell)
         ['Tryndamere']  = {true, spell = 'Slash',             range = 650,   projSpeed = 1450, },
         ['XinZhao']     = {true, spell = _E,                  range = 650,   projSpeed = 2000, }, -- Targeted ability
     }
-    if unit.type == 'obj_AI_Hero' and unit.team == TEAM_ENEMY and isAGapcloserUnit[unit.charName] and GetDistance(unit) < 2000 and spell ~= nil and isAGapcloserUnit[unit.charName].spell and spell.target ~= nil and spell.target.name == myHero.name or isAGapcloserUnit[unit.charName].spell == 'blindmonkqtwo' and W:IsReady() then
-			CastSpell(_W, myHero.x, myHero.z)
+    if unit.type == 'obj_AI_Hero' and unit.team == TEAM_ENEMY and isAGapcloserUnit[unit.charName] and GetDistance(unit) < 2000 then
+			if spell ~= nil and isAGapcloserUnit[unit.charName].spell and spell.target ~= nil and spell.target.name == myHero.name or isAGapcloserUnit[unit.charName].spell == 'blindmonkqtwo' and W:IsReady() then
+				CastSpell(_W, myHero.x, myHero.z)
+			end
 		end
 	end
 end
