@@ -118,6 +118,7 @@ function OnLoad()
 	Config:addSubMenu("Configurations","options")
 	Config.options:addParam("useUlt", "Use Ult", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("useStun", "Use Stun", SCRIPT_PARAM_ONOFF, true)
+	Config.options:addParam("useQ","Use Q in Auto", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("useW", "Interrupt with W", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("useR", "Interrupt with R", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("goodE", "Only Use E If High Chance (For Auto Spell)",SCRIPT_PARAM_ONOFF, false)
@@ -185,7 +186,7 @@ end
 
 function Auto()
 	if ts.target then
-		if Q:IsReady() and Q:IsInRange(ts.target,myHero) then
+		if Q:IsReady() and Q:IsInRange(ts.target,myHero) and Config.options.useQ then
 			CastSpell(_Q,ts.target)
 		end
 		if E:IsReady() and E:IsInRange(ts.target, myHero) then
@@ -194,7 +195,7 @@ function Auto()
 				second = findSecondEnemy(ts.target,eRng)
 				if second then
 					pose2 = E:GetPrediction(second)
-					if GetDistance((second or ts.target)) > 540 then
+					if GetDistance((second or ts.target)) > 540 and pose1 ~= nil and pose2 ~= nil then
 						
 						--
 						m = (pose1.z - pose2.z)/(pose1.x - pose2.x)
@@ -203,14 +204,16 @@ function Auto()
 						x = (- 500 - b)/(m-1)
 						z = (m*x) + b
 						--
-						if pose1 ~= nil and pose2 ~= nil then
+					
 							if Config.options.goodE then
+								
 								if chance >= 2 then
 									ECast(x,z,pose1.x,pose1.z)
-								else
-									ECast(x,z,pose1.x,pose1.z)								end
+								end
+							else
+									ECast(x,z,pose1.x,pose1.z)								
 							end
-						end
+						
 					else
 						if pose1 and pose2 then
 							c = nil
@@ -221,8 +224,9 @@ function Auto()
 							else
 								c = pose2
 								f = pose1
+						
+								ECast(c.x,c.z,f.x,f.z)
 							end
-							ECast(c.x,c.z,f.x,f.z)
 						end
 					end
 				else
