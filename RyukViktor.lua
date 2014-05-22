@@ -2,7 +2,7 @@ require "VPrediction"
 require "SourceLib"
 require "SOW"
 if myHero.charName ~= "Viktor" then return end
-local version = 0.98
+local version = 0.99
 local autoUpdate = true	
 local scriptName = "RyukViktor"
 local sourceLibFound = true
@@ -121,6 +121,7 @@ function OnLoad()
 	Config.options:addParam("useW", "Interrupt with W", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("useR", "Interrupt with R", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("goodE", "Only Use E If High Chance (For Auto Spell)",SCRIPT_PARAM_ONOFF, false)
+	Config.options:addParam("ccc", "CC Chaining with W (Auto must be on)", SCRIPT_PARAM_ONOFF, true)
 	-- Draw
 	Config:addSubMenu("Draw","Draw")
 	Config.Draw:addParam("drawq", "Draw Q", SCRIPT_PARAM_ONOFF, true)
@@ -175,16 +176,26 @@ function Auto()
 						if GetDistance(ts.target) < 540 then
 							Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
 						else
-						start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
-						Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()		
+							start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
+						Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()			
+						end
+					else
+						if GetDistance(ts.target) < 540 then
+							Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
+						else
+							start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
+							Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()		
 						end
 					end
-				else
-					if GetDistance(ts.target) < 540 then
-						Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
-					else
-						start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
-						Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()		
+				end
+			end
+		end
+		if Config.options.ccc and W:IsReady() then
+			for i, enemy in ipairs(GetEnemyHeroes()) do
+				if W:IsInRange(enemy) then
+					posw, chance = W:GetPrediction(enemy)
+					if chance > 3 then
+						CastSpell(_W,posw.x,posw.z)
 					end
 				end
 			end
