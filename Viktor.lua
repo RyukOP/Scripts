@@ -15,11 +15,18 @@ function OnLoad()
 	Config:addParam("harass", "Harass", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
 	Config:addParam("useUlt", "Use Ult", SCRIPT_PARAM_ONOFF, true)
 	Config:addParam("useStun", "Use Stun", SCRIPT_PARAM_ONOFF, true)
-	Config:addParam("drawq", "Draw Q", SCRIPT_PARAM_ONOFF, true)
-	Config:addParam("draww", "Draw W", SCRIPT_PARAM_ONOFF, true)
-	Config:addParam("drawe", "Draw E", SCRIPT_PARAM_ONOFF, true)
-	Config:addParam("drawr", "Draw R", SCRIPT_PARAM_ONOFF, true)
-	Config:addParam("drawtext", "Draw Text", SCRIPT_PARAM_ONOFF, true)
+	Config:addSubMenu("Draw","Draw")
+	Config.Draw:addParam("drawq", "Draw Q", SCRIPT_PARAM_ONOFF, true)
+	Config.Draw:addParam("draww", "Draw W", SCRIPT_PARAM_ONOFF, true)
+	Config.Draw:addParam("drawe", "Draw E", SCRIPT_PARAM_ONOFF, true)
+	Config.Draw:addParam("drawr", "Draw R", SCRIPT_PARAM_ONOFF, true)
+	Config.Draw:addParam("drawtext", "Draw Text", SCRIPT_PARAM_ONOFF, true)
+	Config:addSubMenu("Only Ult","targets")
+	enemyTable = {}
+	for i, enemy in ipairs(GetEnemyHeroes()) do
+		Config.targets:addParam(""..enemy.charName,"".. enemy.charName,SCRIPT_PARAM_ONOFF, true)
+		table.insert(enemyTable,enemy.charName)
+	end
 	ts = TargetSelector(TARGET_LESS_CAST,rRng,DAMAGE_MAGIC,false)
 	ts.name = "Viktor"
 	Config:addTS(ts)
@@ -42,6 +49,17 @@ function OnTick()
 		harass()
 	end
 end
+
+function shouldUlt()
+	if ts.target then
+		if Config.targets[""..ts.target.charName] then
+			return true
+		else
+			return false
+		end
+	end
+end
+					
 
 function harass()
 	if ts.target then
@@ -102,7 +120,7 @@ function fullCombo()
 			end
 		end
 		-- Casting R
-		if Config.useUlt and R:IsReady() and R:IsInRange(ts.target, myHero) then
+		if Config.useUlt and R:IsReady() and R:IsInRange(ts.target, myHero) and shouldUlt() then
 			posr = R:GetPrediction(ts.target)
 			if posr ~= nil then
 				R:Cast(ts.target.x,ts.target.z)
@@ -110,6 +128,7 @@ function fullCombo()
 		end
 	end
 end
+
 
 function stormControl(target)
 	if myHero:GetSpellData(_R).name == "viktorchaosstormguide" then
