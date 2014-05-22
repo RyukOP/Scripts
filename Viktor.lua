@@ -12,6 +12,7 @@ function OnLoad()
 	Config = scriptConfig("RyukViktor","RyukViktor")
 	Config:addParam("active", "Combo", SCRIPT_PARAM_ONKEYDOWN, false, 32)
 	Config:addParam("stun", "Stun Prediction", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("X"))
+	Config:addParam("harass", "Harass", SCRIPT_PARAM_ONKEYDOWN, false, string.byte("C"))
 	Config:addParam("useUlt", "Use Ult", SCRIPT_PARAM_ONOFF, true)
 	Config:addParam("useStun", "Use Stun", SCRIPT_PARAM_ONOFF, true)
 	Config:addParam("drawq", "Draw Q", SCRIPT_PARAM_ONOFF, true)
@@ -37,7 +38,23 @@ function OnTick()
 	if Config.stun then
 		stun()
 	end
-	
+	if Config.harass then
+		harass()
+	end
+end
+
+function harass()
+	if E:IsReady() and E:IsInRange(ts.target, myHero) then
+		pose = E:GetPrediction(ts.target)
+		if pose ~= nil then
+			if GetDistance(ts.target) < 540 then
+				Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, fromY = ts.target.z, toX = pose.x, toY = pose.z }):send()
+			else
+				start = Vector(myHero) - 540 * (Vector(myHero) - Vector(ts.target)):normalized()
+				Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()
+			end
+		end
+	end
 end
 
 function stun()
