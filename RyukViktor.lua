@@ -2,7 +2,7 @@ require "VPrediction"
 require "SourceLib"
 require "SOW"
 if myHero.charName ~= "Viktor" then return end
-local version = 1.0
+local version = 1.01
 local autoUpdate = true	
 local scriptName = "RyukViktor"
 local sourceLibFound = true
@@ -33,37 +33,39 @@ end
 					
 --]]
 
-isAGapcloserUnit = {
-       ['Ahri']        = {true, spell = _R, 	               range = 450,   projSpeed = 2200},
-        ['Aatrox']      = {true, spell = _Q,                  range = 1000,  projSpeed = 1200, },
-        ['Akali']       = {true, spell = _R,                  range = 800,   projSpeed = 2200, }, -- Targeted ability
-        ['Alistar']     = {true, spell = _W,                  range = 650,   projSpeed = 2000, }, -- Targeted ability
-        ['Diana']       = {true, spell = _R,                  range = 825,   projSpeed = 2000, }, -- Targeted ability
-        ['Gragas']      = {true, spell = _E,                  range = 600,   projSpeed = 2000, },
-        ['Graves']      = {true, spell = _E,                  range = 425,   projSpeed = 2000, exeption = true },
-        ['Hecarim']     = {true, spell = _R,                  range = 1000,  projSpeed = 1200, },
-        ['Irelia']      = {true, spell = _Q,                  range = 650,   projSpeed = 2200, }, -- Targeted ability
-        ['JarvanIV']    = {true, spell = jarvanAddition,      range = 770,   projSpeed = 2000, }, -- Skillshot/Targeted ability
-        ['Jax']         = {true, spell = _Q,                  range = 700,   projSpeed = 2000, }, -- Targeted ability
-        ['Jayce']       = {true, spell = 'JayceToTheSkies',   range = 600,   projSpeed = 2000, }, -- Targeted ability
-		['Katarina']	 = {true, spell = _E,                   range = 700,   projSpeed = 2000, },
-        ['Khazix']      = {true, spell = _E,                  range = 900,   projSpeed = 2000, },
-        ['Leblanc']     = {true, spell = _W,                  range = 600,   projSpeed = 2000, },
-        ['LeeSin']      = {true, spell = 'blindmonkqtwo',     range = 1300,  projSpeed = 1800, },
-        ['Leona']       = {true, spell = _E,                  range = 900,   projSpeed = 2000, },
-        ['Malphite']    = {true, spell = _R,                  range = 1000,  projSpeed = 1500, },
-        ['Maokai']      = {true, spell = _Q,                  range = 600,   projSpeed = 1200, }, -- Targeted ability	
-		['MasterYi']	=  {true, spell = _Q,	               range = 600,   projSpeed = 2200, }, -- Targeted
-        ['MonkeyKing']  = {true, spell = _E,                  range = 650,   projSpeed = 2200, }, -- Targeted ability
-        ['Pantheon']    = {true, spell = _W,                  range = 600,   projSpeed = 2000, }, -- Targeted ability
-        ['Poppy']       = {true, spell = _E,                  range = 525,   projSpeed = 2000, }, -- Targeted ability
-        --['Quinn']       = {true, spell = _E,                  range = 725,   projSpeed = 2000, }, -- Targeted ability
-        ['Renekton']    = {true, spell = _E,                  range = 450,   projSpeed = 2000, },
-        ['Sejuani']     = {true, spell = _Q,                  range = 650,   projSpeed = 2000, },
-        ['Shen']        = {true, spell = _E,                  range = 575,   projSpeed = 2000, },
-        ['Tristana']    = {true, spell = _W,                  range = 900,   projSpeed = 2000, },
-        ['Tryndamere']  = {true, spell = 'Slash',             range = 650,   projSpeed = 1450, },
-        ['XinZhao']     = {true, spell = _E,                  range = 650,   projSpeed = 2000, }, -- Targeted ability
+gapCloseList = {
+       ['Ahri']        = {true, spell = 'AhriTumble'},
+        ['Aatrox']      = {true, spell = 'AatroxQ'},
+        ['Akali']       = {true, spell = 'AkaliShadowDance'}, -- Targeted ability
+        ['Alistar']     = {true, spell = 'Headbutt'}, -- Targeted ability
+        ['Diana']       = {true, spell = 'DianaTeleport'}, -- Targeted ability
+        ['Gragas']      = {true, spell = 'GragasE'},
+        ['Graves']      = {true, spell = 'GravesMove'},
+        ['Hecarim']     = {true, spell = 'HecarimUlt'},
+        ['Irelia']      = {true, spell = 'IreliaGatotsu'}, -- Targeted ability
+        ['JarvanIV']    = {true, spell = 'JarvanIVDragonStrike'}, -- Skillshot/Targeted ability
+        ['Jax']         = {true, spell = 'JaxLeapStrike'}, -- Targeted ability
+        ['Jayce']       = {true, spell = 'JayceToTheSkies'}, -- Targeted ability
+		['Katarina']	 = {true, spell = 'KatarinaE'},
+        ['Khazix']      = {true, spell = 'KhazixW'},
+        ['Leblanc']     = {true, spell = 'LeblancSlide'},
+        ['LeeSin']      = {true, spell = 'blindmonkqtwo'},
+        ['Leona']       = {true, spell = 'LeonaZenithBlade'},
+        ['Malphite']    = {true, spell = 'UFSlash'},
+        ['Maokai']      = {true, spell = 'MaokaiTrunkLine',}, -- Targeted ability	
+		['MasterYi']	=  {true, spell = 'AlphaStrike',}, -- Targeted
+        ['MonkeyKing']  = {true, spell = 'MonkeyKingNimbus'}, -- Targeted ability
+        ['Pantheon']    = {true, spell = 'PantheonW'}, -- Targeted ability
+        ['Pantheon']    = {true, spell = 'PantheonRJump'},
+        ['Pantheon']    = {true, spell = 'PantheonRFall' },
+        ['Poppy']       = {true, spell = 'PoppyHeroicCharge'}, -- Targeted ability
+        --['Quinn']       = {true, spell = 'QuinnE',                  range = 725,   projSpeed = 2000, }, -- Targeted ability
+        ['Renekton']    = {true, spell = 'RenektonSliceAndDice'},
+        ['Sejuani']     = {true, spell = 'SejuaniArcticAssault'},
+        ['Shen']        = {true, spell = 'ShenShadowDash'},
+        ['Tristana']    = {true, spell = 'RocketJump'},
+        ['Tryndamere']  = {true, spell = 'Slash'},
+        ['XinZhao']     = {true, spell = 'XenZhaoSweep'}, -- Targeted ability
 }
 --[[
 
@@ -86,7 +88,8 @@ champsToStun = {
                 { charName = "Urgot",           spellName = "UrgotSwap2" ,                 important = 0},
                 { charName = "Malzahar",        spellName = "AlZaharNetherGrasp" ,         important = 0},
                 { charName = "Karthus",         spellName = "FallenOne" ,                  important = 0},
-                { charName = "Pantheon",        spellName = "Pantheon_GrandSkyfall_Jump" , important = 0},
+                { charName = "Pantheon",        spellName = "PantheonRJump" ,              important = 0},
+				{  charName = "Pantheon",        spellName = "PantheonRFall",               important = 0},
                 { charName = "Varus",           spellName = "VarusQ" ,                     important = 1},
                 { charName = "Caitlyn",         spellName = "CaitlynAceintheHole" ,        important = 1},
                 { charName = "MissFortune",     spellName = "MissFortuneBulletTime" ,      important = 1},
@@ -382,12 +385,15 @@ function OnDraw()
 end
 
 function OnProcessSpell(unit, spell)
-	if Config.bind.gapClose then
+	if Config.bind.gapClose and W:IsReady() then
 		local jarvanAddition = unit.charName == "JarvanIV" and unit:CanUseSpell(_Q) ~= READY and _R or _Q 
-		if unit.type == 'obj_AI_Hero' and unit.team == TEAM_ENEMY and isAGapcloserUnit[unit.charName] and GetDistance(unit) < 2000 and spell ~= nil and W:IsReady() then
-			if spell.name == (type(isAGapcloserUnit[unit.charName].spell) == 'number' and unit:GetSpellData(isAGapcloserUnit[unit.charName].spell).name or isAGapcloserUnit[unit.charName].spell) then
+		if unit.type == 'obj_AI_Hero' and unit.team == TEAM_ENEMY then
+			local spellName = spell.name
+			if gapCloseList[unit.charName] and spellName == gapCloseList[unit.charName].spell and GetDistance(unit) < 2000 then
 				if spell.target ~= nil and spell.target.name == myHero.name or isAGapcloserUnit[unit.charName].spell == 'blindmonkqtwo' then
-					CastSpell(_W, myHero.x, myHero.z)
+				--pos = W:GetPrediction(unit)
+				--if pos then
+					CastSpell(_W,myHero.x,myHero.z)
 				end
 			end
 		end
