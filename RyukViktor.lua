@@ -2,7 +2,7 @@ require "VPrediction"
 require "SourceLib"
 require "SOW"
 if myHero.charName ~= "Viktor" then return end
-local version = 1.01
+local version = 1.02
 local autoUpdate = true	
 local scriptName = "RyukViktor"
 local sourceLibFound = true
@@ -390,7 +390,7 @@ function OnProcessSpell(unit, spell)
 		if unit.type == 'obj_AI_Hero' and unit.team == TEAM_ENEMY then
 			local spellName = spell.name
 			if gapCloseList[unit.charName] and spellName == gapCloseList[unit.charName].spell and GetDistance(unit) < 2000 then
-				if spell.target ~= nil and spell.target.name == myHero.name or isAGapcloserUnit[unit.charName].spell == 'blindmonkqtwo' then
+				if spell.target ~= nil and spell.target.name == myHero.name or gapCloseList[unit.charName].spell == 'blindmonkqtwo' then
 				--pos = W:GetPrediction(unit)
 				--if pos then
 					CastSpell(_W,myHero.x,myHero.z)
