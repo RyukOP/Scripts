@@ -4,7 +4,7 @@ require "SOW"
 
 if myHero.charName ~= "Lissandra" then return end
 
-local version = 0.03
+local version = 0.04
 local autoUpdate = true	
 local scriptName = "RyukLissandra"
 local sourceLibFound = true
@@ -241,12 +241,8 @@ function fullCombo(target)
 		castDFG(target)
 		castQ(target)
 		castW(target)
-		if Config.options.useEInCombo then
-			castE(target,wRng)
-		end
-		if shouldUlt(target) then
-			castR(target)
-		end
+		castE(target,wRng)
+		castR(target)
 	end
 end
 
