@@ -4,7 +4,7 @@ require "SOW"
 
 if myHero.charName ~= "Lissandra" then return end
 
-local version = 0.06
+local version = 1.0
 local autoUpdate = true	
 local scriptName = "RyukLissandra"
 local sourceLibFound = true
