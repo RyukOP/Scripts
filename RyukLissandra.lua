@@ -4,7 +4,7 @@ require "SOW"
 
 if myHero.charName ~= "Lissandra" then return end
 
-local version = 0.01
+local version = 0.02
 local autoUpdate = true	
 local scriptName = "RyukLissandra"
 local sourceLibFound = true
@@ -78,7 +78,7 @@ function OnLoad()
 	VP = VPrediction()
 	qRng, wRng, eRng, rRng = 815, 450, 1050, 550
 	
-	Q = Spell(_Q, qRng):SetSkillshot(VP, SKILLSHOT_LINEAR, 75, 0.5, 1200, true)
+	Q = Spell(_Q, qRng):SetSkillshot(VP, SKILLSHOT_LINEAR, 75, 0.5, 1200, false)
 	W = Spell(_W, wRng)
 	E = Spell(_E, eRng):SetSkillshot(VP, SKILLSHOT_LINEAR, 110, 0.5, 850, false)
 	R = Spell(_R, rRng)
