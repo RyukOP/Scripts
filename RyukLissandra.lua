@@ -4,7 +4,7 @@ require "SOW"
 
 if myHero.charName ~= "Lissandra" then return end
 
-local version = 0.05
+local version = 0.06
 local autoUpdate = true	
 local scriptName = "RyukLissandra"
 local sourceLibFound = true
@@ -178,7 +178,7 @@ function auto(target)
 end
 
 function castDFG(target)
-	if target and DFG:IsReady() and DFG:IsInRange(target) then
+	if target and DFG:IsReady() and GetDistance(ts.target) < 600 then
 		DFG:Cast(target)
 	end	
 end
