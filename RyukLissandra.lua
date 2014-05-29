@@ -4,7 +4,7 @@ require "SOW"
 
 if myHero.charName ~= "Lissandra" then return end
 
-local version = 0.04
+local version = 0.05
 local autoUpdate = true	
 local scriptName = "RyukLissandra"
 local sourceLibFound = true
@@ -160,7 +160,7 @@ function OnTick()
 	EnemyMinions:update()
 	
 	if Config.bind.active then
-		-- main combo
+		fullCombo(ts.target)
 	end
 	if Config.bind.harass then
 		castQ(ts.target)
@@ -241,8 +241,12 @@ function fullCombo(target)
 		castDFG(target)
 		castQ(target)
 		castW(target)
-		castE(target,wRng)
-		castR(target)
+		if Config.options.useEInCombo then
+			castE(target,wRng)
+		end
+		if shouldUlt(target) then
+			castR(target)
+		end
 	end
 end
 
