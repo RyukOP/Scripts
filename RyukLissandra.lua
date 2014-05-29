@@ -4,7 +4,7 @@ require "SOW"
 
 if myHero.charName ~= "Lissandra" then return end
 
-local version = 0.02
+local version = 0.03
 local autoUpdate = true	
 local scriptName = "RyukLissandra"
 local sourceLibFound = true
@@ -158,6 +158,7 @@ end
 function OnTick()
 	ts:update()
 	EnemyMinions:update()
+	
 	if Config.bind.active then
 		-- main combo
 	end
@@ -201,7 +202,7 @@ function castE(target,range)
 			if enemy then
 				pos1 = E:GetPrediction(target)
 				pos2 = E:GetPrediction(enemy)
-				if pos1 and pos2 and GetDistance(pos1,pos2) < wRng and EClaw ~= nil then
+				if pos1 and pos2 and GetDistance(pos1,pos2) < wRng and EClaw == nil then
 					pos3 = (pos1 + pos2)/2
 					E:Cast(pos3.x,pos3.z)
 				end
@@ -210,7 +211,7 @@ function castE(target,range)
 				end
 			else
 				pos = E:GetPrediction(target)
-				if pos and EClaw ~= nil then
+				if pos and EClaw == nil then
 					E:Cast(pos.x,pos.z)
 				end
 				if pos and eAndTarget(pos,range) then
@@ -219,13 +220,19 @@ function castE(target,range)
 			end
 		else
 			pos = E:GetPrediction(target)
-			if pos and EClaw ~= nil then
+			if pos and EClaw == nil then
 				E:Cast(pos.x,pos.z)
 			end
 			if pos and eAndTarget(pos,range) then
 				E:Cast()
 			end
 		end
+	end
+end
+
+function castR(target)
+	if target and R:IsReady() and R:IsInRange(target) then
+		R:Cast(target)
 	end
 end
 
