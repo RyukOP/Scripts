@@ -4,7 +4,7 @@ require "SOW"
 
 if myHero.charName ~= "Lissandra" then return end
 
-local version = 1.2
+local version = 1.21
 local autoUpdate = true	
 local scriptName = "RyukLissandra"
 local sourceLibFound = true
@@ -230,8 +230,14 @@ end
 function castQ(target,chance)
 	if target and Q:IsReady() and Q:IsInRange(target) then
 		pos, qchance = Q:GetPrediction(target)
-		if pos and qchance >= chance then
-			Q:Cast(pos.x,pos.z)
+		if pos then
+			if Config.options.highQ then
+				if qchance >= 2 then
+					Q:Cast(pos.x,pos.z)
+				end
+			else
+				Q:Cast(pos.x,pos.z)
+			end
 		end
 	end
 end
