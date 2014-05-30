@@ -108,7 +108,7 @@ function OnLoad()
 	Config.options:addParam("useEInCombo", "Use E In Combo", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("eRngChamp", "Range Between Claw and Enemy", SCRIPT_PARAM_SLICE, 450, 0, 900, 0)
 	Config.options:addParam("selfUlt", "Self Ult", SCRIPT_PARAM_ONOFF, true)
-	Config.options:addParam("numEnemiesHit", "Number of Enemies Needed To Hit With R", SCRIPT_PARAM_SLICE, 2, 1, 5, 0)
+	Config.options:addParam("numEnemiesHit", "Number of Enemies Needed To Hit With R", SCRIPT_PARAM_SLICE, 1, 1, 5, 0)
 	Config.options:addParam("numEnemies", "Number of Enemies to Self Ult", SCRIPT_PARAM_SLICE, 3, 1, 5, 0)
 	Config.options:addParam("numAllies", "Number of Allies to Self Ult", SCRIPT_PARAM_SLICE, 2, 1, 5, 0)
 	Config.options:addParam("enemyRange", "Count Enemies Within Range", SCRIPT_PARAM_SLICE, 1000, 1000, 2000, 0)
@@ -160,10 +160,10 @@ function findSecondEnemy(first,range)
 	return current
 end
 
-function numE(range)
+function numE(pos,range)
 	local ChampCount = 0
 	for i, enemy in ipairs(GetEnemyHeroes()) do
-		if enemy and GetDistance(enemy) <= range then
+		if enemy and GetDistance(enemy,pos) <= range then
 			ChampCount = ChampCount + 1
 		end
 	end		
@@ -275,10 +275,10 @@ end
 
 function castR(target)
 	if target and R:IsReady() and R:IsInRange(target) then
-		if Config.options.selfUlt and Config.options.numEnemies <= numE(Config.options.enemyRange) and Config.options.numAllies <= numA(Config.options.allyRange) then
+		if Config.options.selfUlt and Config.options.numEnemies <= numE(myHero,Config.options.enemyRange) and Config.options.numAllies <= numA(Config.options.allyRange) and Config.options.numEnemiesHit <= numE(myHero,rRng) then
 			R:Cast()
 		else
-			if shouldUlt(target) then
+			if shouldUlt(target) and Config.options.numEnemiesHit <= numE(target,rRng) then
 				R:Cast(target)
 			end
 		end
