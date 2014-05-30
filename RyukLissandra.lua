@@ -4,7 +4,7 @@ require "SOW"
 
 if myHero.charName ~= "Lissandra" then return end
 
-local version = 1.1
+local version = 1.2
 local autoUpdate = true	
 local scriptName = "RyukLissandra"
 local sourceLibFound = true
@@ -104,6 +104,7 @@ function OnLoad()
 	-- Options
 	Config:addSubMenu("Configurations","options")
 	Config.options:addParam("useUlt", "Use Ult", SCRIPT_PARAM_ONOFF, true)
+	Config.options:addParam("walkToMouse", "Walk To Mouse", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("highQ", "Use Q in Auto Only If High Chance", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("useEInCombo", "Use E In Combo", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("eRngChamp", "Range Between Claw and Enemy", SCRIPT_PARAM_SLICE, 450, 0, 900, 0)
@@ -200,6 +201,9 @@ function OnTick()
 	end
 	if Config.bind.harass then
 		castQ(ts.target)
+		if Config.options.walkToMouse then
+			myHero:MoveTo(mousePos.x,mousePos.z)
+		end
 	end
 	if Config.bind.auto then
 		auto(ts.target)
