@@ -4,7 +4,7 @@ require "SOW"
 
 if myHero.charName ~= "Lissandra" then return end
 
-local version = 1.0
+local version = 1.1
 local autoUpdate = true	
 local scriptName = "RyukLissandra"
 local sourceLibFound = true
@@ -76,13 +76,20 @@ champsToStun = {
 function OnLoad()
 	
 	VP = VPrediction()
-	qRng, wRng, eRng, rRng = 815, 450, 1050, 550
+	qRng, wRng, eRng, rRng = 825, 450, 1050, 550
 	
 	Q = Spell(_Q, qRng):SetSkillshot(VP, SKILLSHOT_LINEAR, 75, 0.5, 1200, false)
 	W = Spell(_W, wRng)
 	E = Spell(_E, eRng):SetSkillshot(VP, SKILLSHOT_LINEAR, 110, 0.5, 850, false)
 	R = Spell(_R, rRng)
 	DFG = Item(3128,750)
+	--DamageLib:RegisterDamageSource(spellId, damagetype, basedamage, perlevel, scalingtype, scalingstat, percentscaling, condition, extra)
+	DLib = DamageLib()
+	DLib:RegisterDamageSource(_Q, _MAGIC, 75, 35, _MAGIC, _AP, 0.65, function() return (player:CanUseSpell(_Q) == READY)end)
+	DLib:RegisterDamageSource(_W, _MAGIC, 70, 40, _MAGIC, _AP, 0.60, function() return (player:CanUseSpell(_W) == READY)end)
+	DLib:RegisterDamageSource(_E, _MAGIC, 70, 45, _MAGIC, _AP, 0.60, function() return (player:CanUseSpell(_E) == READY)end)
+	DLib:RegisterDamageSource(_R, _MAGIC, 150, 100, _MAGIC, _AP, 0.75, function() return (player:CanUseSpell(_R) == READY)end)
+
 	
 	Config = scriptConfig("RyukLissandra","RyukLissandra")
 	
@@ -97,7 +104,15 @@ function OnLoad()
 	-- Options
 	Config:addSubMenu("Configurations","options")
 	Config.options:addParam("useUlt", "Use Ult", SCRIPT_PARAM_ONOFF, true)
+	Config.options:addParam("highQ", "Use Q in Auto Only If High Chance", SCRIPT_PARAM_ONOFF, true)
 	Config.options:addParam("useEInCombo", "Use E In Combo", SCRIPT_PARAM_ONOFF, true)
+	Config.options:addParam("eRngChamp", "Range Between Claw and Enemy", SCRIPT_PARAM_SLICE, 450, 0, 900, 0)
+	Config.options:addParam("selfUlt", "Self Ult", SCRIPT_PARAM_ONOFF, true)
+	Config.options:addParam("numEnemiesHit", "Number of Enemies Needed To Hit With R", SCRIPT_PARAM_SLICE, 2, 1, 5, 0)
+	Config.options:addParam("numEnemies", "Number of Enemies to Self Ult", SCRIPT_PARAM_SLICE, 3, 1, 5, 0)
+	Config.options:addParam("numAllies", "Number of Allies to Self Ult", SCRIPT_PARAM_SLICE, 2, 1, 5, 0)
+	Config.options:addParam("enemyRange", "Count Enemies Within Range", SCRIPT_PARAM_SLICE, 1000, 1000, 2000, 0)
+	Config.options:addParam("allyRange", "Count Ally Within Range", SCRIPT_PARAM_SLICE, 1000, 1000, 2000, 0)
 	Config.options:addParam("hitTwo", "Attempt to hit two with E -> W", SCRIPT_PARAM_ONOFF, true)
 	-- Draw
 	Config:addSubMenu("Draw","Draw")
@@ -105,7 +120,8 @@ function OnLoad()
 	Config.Draw:addParam("drawW", "Draw W", SCRIPT_PARAM_ONOFF, true)
 	Config.Draw:addParam("drawe", "Draw E", SCRIPT_PARAM_ONOFF, true)
 	Config.Draw:addParam("drawr", "Draw R", SCRIPT_PARAM_ONOFF, true)
-	
+	Combo = {_Q, _W, _E, _R}
+	DLib:AddToMenu(Config.Draw,Combo)
 	-- OnlyUlt
 	Config:addSubMenu("Only Ult","targets")
 	
@@ -144,6 +160,26 @@ function findSecondEnemy(first,range)
 	return current
 end
 
+function numE(range)
+	local ChampCount = 0
+	for i, enemy in ipairs(GetEnemyHeroes()) do
+		if enemy and GetDistance(enemy) <= range then
+			ChampCount = ChampCount + 1
+		end
+	end		
+	return ChampCount
+end
+
+function numA(range)
+	local ChampCount = 0
+	for i, ally in ipairs(GetAllyHeroes()) do
+		if ally and GetDistance(ally) <= range then
+			ChampCount = ChampCount + 1
+		end
+	end		
+	return ChampCount
+end
+
 function shouldUlt(target)
 	if target then
 		if Config.targets[""..target.charName] then
@@ -172,20 +208,27 @@ end
 
 function auto(target) 
 	if target then
-		castQ(target)
+		if Config.options.highQ then
+			castQ(target,2)
+		else
+			castQ(target)
+		end
 		castW(target)
 	end
 end
 
 function castDFG(target)
-	if target and DFG:IsReady() and GetDistance(ts.target) < 600 then
+	if target and DFG:IsReady() and DFG:InRange(target) then
 		DFG:Cast(target)
 	end	
 end
 
-function castQ(target)
+function castQ(target,chance)
 	if target and Q:IsReady() and Q:IsInRange(target) then
-		Q:Cast(target)
+		pos, qchance = Q:GetPrediction(target)
+		if pos and qchance >= chance then
+			Q:Cast(pos.x,pos.z)
+		end
 	end
 end
 
@@ -232,7 +275,13 @@ end
 
 function castR(target)
 	if target and R:IsReady() and R:IsInRange(target) then
-		R:Cast(target)
+		if Config.options.selfUlt and Config.options.numEnemies <= numE(Config.options.enemyRange) and Config.options.numAllies <= numA(Config.options.allyRange) then
+			R:Cast()
+		else
+			if shouldUlt(target) then
+				R:Cast(target)
+			end
+		end
 	end
 end
 
@@ -242,11 +291,9 @@ function fullCombo(target)
 		castQ(target)
 		castW(target)
 		if Config.options.useEInCombo then
-			castE(target,wRng)
+			castE(target,Config.options.eRngChamp)
 		end
-		if shouldUlt(target) then
-			castR(target)
-		end
+		castR(target)
 	end
 end
 
