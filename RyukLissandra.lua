@@ -4,7 +4,7 @@ require "SOW"
 
 if myHero.charName ~= "Lissandra" then return end
 
-local version = 1.21
+local version = 1.22
 local autoUpdate = true	
 local scriptName = "RyukLissandra"
 local sourceLibFound = true
@@ -35,16 +35,21 @@ gapCloseList = {
         ['Irelia']      = {true, spell = 'IreliaGatotsu'},
         ['JarvanIV']    = {true, spell = 'JarvanIVDragonStrike'},
         ['Jax']         = {true, spell = 'JaxLeapStrike'}, 
-        ['Jayce']       = {true, spell = 'JayceToTheSkies'}, 		['Katarina']	 = {true, spell = 'KatarinaE'},
+        ['Jayce']       = {true, spell = 'JayceToTheSkies'}, 		
+        ['Katarina']	 = {true, spell = 'KatarinaE'},
         ['Khazix']      = {true, spell = 'KhazixW'},
         ['Leblanc']     = {true, spell = 'LeblancSlide'},
         ['LeeSin']      = {true, spell = 'blindmonkqtwo'},
         ['Leona']       = {true, spell = 'LeonaZenithBlade'},
         ['Malphite']    = {true, spell = 'UFSlash'},
-        ['Maokai']      = {true, spell = 'MaokaiTrunkLine',}, 		['MasterYi']	 = {true, spell = 'AlphaStrike',}, 	    ['MonkeyKing']  = {true, spell = 'MonkeyKingNimbus'},         
-		['Pantheon']    = {true, spell = 'PantheonW'}, 		['Pantheon']    = {true, spell = 'PantheonRJump'},
+        ['Maokai']      = {true, spell = 'MaokaiTrunkLine',}, 		
+        ['MasterYi']	 = {true, spell = 'AlphaStrike',}, 	    
+        ['MonkeyKing']  = {true, spell = 'MonkeyKingNimbus'},         
+	['Pantheon']    = {true, spell = 'PantheonW'}, 		
+	['Pantheon']    = {true, spell = 'PantheonRJump'},
         ['Pantheon']    = {true, spell = 'PantheonRFall'},
-        ['Poppy']       = {true, spell = 'PoppyHeroicCharge'}, 		['Renekton']    = {true, spell = 'RenektonSliceAndDice'},
+        ['Poppy']       = {true, spell = 'PoppyHeroicCharge'}, 		
+        ['Renekton']    = {true, spell = 'RenektonSliceAndDice'},
         ['Sejuani']     = {true, spell = 'SejuaniArcticAssault'},
         ['Shen']        = {true, spell = 'ShenShadowDash'},
         ['Tristana']    = {true, spell = 'RocketJump'},
@@ -77,7 +82,6 @@ function OnLoad()
 	
 	VP = VPrediction()
 	qRng, wRng, eRng, rRng = 825, 450, 1050, 550
-	
 	Q = Spell(_Q, qRng):SetSkillshot(VP, SKILLSHOT_LINEAR, 75, 0.5, 1200, false)
 	W = Spell(_W, wRng)
 	E = Spell(_E, eRng):SetSkillshot(VP, SKILLSHOT_LINEAR, 110, 0.5, 850, false)
@@ -328,7 +332,7 @@ function OnProcessSpell(unit, spell)
 		if unit.type == 'obj_AI_Hero' and unit.team == TEAM_ENEMY then
 			local spellName = spell.name
 			if gapCloseList[unit.charName] and spellName == gapCloseList[unit.charName].spell and GetDistance(unit) < 2000 then
-				if spell.target ~= nil and spell.target.name == myHero.name or gapCloseList[unit.charNam].spell == 'blindmonkqtwo' then
+				if spell.target ~= nil and spell.target.name == myHero.name or gapCloseList[unit.charName].spell == 'blindmonkqtwo' then
 					CastSpell(_W,myHero.x,myHero.z)
 				end
 			end
