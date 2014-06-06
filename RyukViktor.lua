@@ -2,7 +2,7 @@ require "VPrediction"
 require "SourceLib"
 require "SOW"
 if myHero.charName ~= "Viktor" then return end
-local version = 1.03
+local version = 1.04
 local autoUpdate = true	
 local scriptName = "RyukViktor"
 local sourceLibFound = true
@@ -32,7 +32,7 @@ end
 					
 					
 --]]
-SendChat("Hey")
+
 gapCloseList = {
        ['Ahri']        = {true, spell = 'AhriTumble'},
         ['Aatrox']      = {true, spell = 'AatroxQ'},
