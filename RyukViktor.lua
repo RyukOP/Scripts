@@ -346,8 +346,8 @@ function fullCombo()
 				if GetDistance(ts.target) < 540 then
 					Packet('S_CAST', { spellId = SPELL_3, fromX = ts.target.x, ts.target.z, toX = pose.x, toY = pose.z }):send()
 				else
-					--start = Vector(myHero) - 540 * (Vector(myHero) - Vector(ts.target)):normalized()
-					start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
+					start = Vector(myHero) - 540 * (Vector(myHero) - Vector(ts.target)):normalized()
+					--start = Vector(myHero) + (myHero - pose)*(-550/GetDistance(pose))
 					Packet('S_CAST', { spellId = SPELL_3, fromX = start.x, fromY = start.z, toX = pose.x, toY = pose.z }):send()
 				end
 			end
